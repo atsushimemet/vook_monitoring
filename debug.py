@@ -32,14 +32,23 @@ def basic_info():
     return config
 
 
-def user_info(
+def media_info(
     business_account_id=INSTAGRAM_ACCOUNT_ID,
     token=ACCESS_TOKEN,
     username=username,
-    fields=fields,
+    fields=media_fields,
 ):
-    """ユーザー情報を取得する"""
-    request_url = f"https://graph.facebook.com/{version}/{business_account_id}?fields=business_discovery.username({username}){{{fields}}}&access_token={token}"
+    """メディア情報を取得する"""
+    request_url = (
+        "https://graph.facebook.com/"
+        + version
+        + "/{business_account_id}?fields=business_discovery.username({username}){{media{{{media_fields}}}}}&access_token={token}".format(
+            business_account_id=business_account_id,
+            username=username,
+            media_fields=media_fields,
+            token=token,
+        )
+    )
     response = requests.get(request_url)
     return response.json()["business_discovery"]
 
@@ -47,13 +56,12 @@ def user_info(
 def user_media_info(business_account_id, token, username, media_fields):
     """メディア情報を取得する"""
     all_response = []
-    result = user_info()
+    result = media_info()
     all_response.append(result["media"]["data"])
-    print(all_response)
+    print(result["media"]["paging"]["cursors"].keys())
     import sys
 
     sys.exit()
-
     # 過去分がある場合は過去分全て取得する(1度に取得できる件数は25件)
     if "after" in result["media"]["paging"]["cursors"].keys():
         next_token = result["media"]["paging"]["cursors"]["after"]
@@ -83,8 +91,7 @@ def user_media_info(business_account_id, token, username, media_fields):
 
 def main():
     p_basic_info = basic_info()
-    p_user_info = user_info()
-    user_media_info()
+    user_media_info(business_account_id, token, username, media_fields)
 
 
 if __name__ == "__main__":
