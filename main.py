@@ -63,12 +63,6 @@ def user_info(
     return response.json()["business_discovery"]
 
 
-print(user_info(business_account_id, token, username, fields))
-import sys
-
-sys.exit()
-
-
 # メディア情報を取得する
 def user_media_info(business_account_id, token, username, media_fields):
     all_response = []
@@ -117,7 +111,11 @@ def user_media_info(business_account_id, token, username, media_fields):
 
 
 result = user_media_info(business_account_id, token, username, media_fields)
+for res in result:
+    print(res, end="\n\n")
+import sys
 
+sys.exit()
 """結果をデータフレームに格納"""
 df_media_info = pd.DataFrame(result[0])
 for noc in np.arange(1, len(result)):
