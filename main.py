@@ -1,16 +1,11 @@
 # https://vook-tokyo.slack.com/archives/C04P4S8NCJZ/p1708148174852639?thread_ts=1708148163.348379&cid=C04P4S8NCJZ
-import datetime
-import json
-import sys
-from pprint import pprint
 
 import gspread
 import numpy as np
 import pandas as pd
 import requests
 
-sys.path.append("../")
-from instaapi.local_config_vook import *
+from local_config import *
 
 
 def basic_info():
