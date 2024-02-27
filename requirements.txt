@@ -2,3 +2,7 @@ gspread
 numpy
 pandas
 requests
+black
+isort
+mypy
+flake8
