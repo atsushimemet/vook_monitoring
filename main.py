@@ -63,7 +63,10 @@ def user_info(
     return response.json()["business_discovery"]
 
 
-# print(user_info(business_account_id,token,username,fields))
+print(user_info(business_account_id, token, username, fields))
+import sys
+
+sys.exit()
 
 
 # メディア情報を取得する
