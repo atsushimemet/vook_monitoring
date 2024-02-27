@@ -116,6 +116,7 @@ for res in result:
 import sys
 
 sys.exit()
+"""NOTE: 02/27 コーディネート系の6投稿しか取得できていない。"""
 """結果をデータフレームに格納"""
 df_media_info = pd.DataFrame(result[0])
 for noc in np.arange(1, len(result)):
