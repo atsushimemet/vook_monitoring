@@ -30,17 +30,8 @@ def basic_info():
 
 
 params = basic_info()
-print(params)
-import sys
-
-sys.exit()
 
 """各投稿のinformation(基本的な情報)を取得"""
-
-
-# import pandas as pd
-# pd.set_option('display.max_rows', None)
-
 # アクセス情報
 business_account_id = INSTAGRAM_ACCOUNT_ID
 token = ACCESS_TOKEN
