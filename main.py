@@ -30,6 +30,10 @@ def basic_info():
 
 
 params = basic_info()
+print(params)
+import sys
+
+sys.exit()
 
 """各投稿のinformation(基本的な情報)を取得"""
 
@@ -140,11 +144,11 @@ for noc in np.arange(len(result)):
     ※これは各投稿IDごとにAPIコールが必要なため、処理に少し時間がかかる。改善方法を検討中"""
 
 """
-    ***********************************************************************************
-    【APIエンドポイント】
-    https://graph.facebook.com/{graph-api-version}/{ig-media-id}/insights?metric={metric}
-    ***********************************************************************************
-    """
+***********************************************************************************
+【APIエンドポイント】
+https://graph.facebook.com/{graph-api-version}/{ig-media-id}/insights?metric={metric}
+***********************************************************************************
+"""
 
 
 # media IDからインサイトを取得する関数
