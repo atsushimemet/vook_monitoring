@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 import requests
 
 from local_config import *
@@ -68,9 +70,7 @@ def user_media_info(business_account_id, token, username, media_fields):
     if "after" in result["media"]["paging"]["cursors"].keys():
         next_token = result["media"]["paging"]["cursors"]["after"]
         while next_token is not None:
-            request_url = media_info(next_token=next_token)
-            response = requests.get(request_url)
-            result = response.json()["business_discovery"]
+            result = media_info(next_token=next_token)
             all_response.append(result["media"]["data"])
             if "after" in result["media"]["paging"]["cursors"].keys():
                 next_token = result["media"]["paging"]["cursors"]["after"]
@@ -81,7 +81,14 @@ def user_media_info(business_account_id, token, username, media_fields):
 
 def main():
     p_basic_info = basic_info()
-    user_media_info(business_account_id, token, username, media_fields)
+    result = user_media_info(business_account_id, token, username, media_fields)
+    """結果をデータフレームに格納"""
+    df_media_info = pd.DataFrame(result[0])
+    for noc in np.arange(1, len(result)):
+        output_per_call = pd.DataFrame(result[noc])
+        df_media_info = pd.concat([df_media_info, output_per_call], ignore_index=True)
+    print(df_media_info.head())
+    print(df_media_info.shape)
 
 
 if __name__ == "__main__":
