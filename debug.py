@@ -79,14 +79,19 @@ def user_media_info(business_account_id, token, username, media_fields):
     return all_response
 
 
-def main():
-    p_basic_info = basic_info()
-    result = user_media_info(business_account_id, token, username, media_fields)
+def create_media_info_df(result: dict) -> pd.DataFrame:
     """結果をデータフレームに格納"""
     df_media_info = pd.DataFrame(result[0])
     for noc in np.arange(1, len(result)):
         output_per_call = pd.DataFrame(result[noc])
         df_media_info = pd.concat([df_media_info, output_per_call], ignore_index=True)
+    return df_media_info
+
+
+def main():
+    p_basic_info = basic_info()
+    result = user_media_info(business_account_id, token, username, media_fields)
+    df_media_info = create_media_info_df(result)
     print(df_media_info.head())
     print(df_media_info.shape)
 
