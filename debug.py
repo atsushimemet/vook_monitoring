@@ -36,10 +36,14 @@ def media_info(
     business_account_id=INSTAGRAM_ACCOUNT_ID,
     token=ACCESS_TOKEN,
     username=username,
-    fields=media_fields,
+    media_fields=media_fields,
+    next_token=None,
 ):
     """メディア情報を取得する"""
-    base_url = "/{business_account_id}?fields=business_discovery.username({username}){{media{{{media_fields}}}}}&access_token={token}"
+    if next_token:
+        base_url = "/{business_account_id}?fields=business_discovery.username({username}){{media.after({next_token}){{{media_fields}}}}}&access_token={token}"
+    else:
+        base_url = "/{business_account_id}?fields=business_discovery.username({username}){{media{{{media_fields}}}}}&access_token={token}"
     request_url = (
         "https://graph.facebook.com/"
         + version
