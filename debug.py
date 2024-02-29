@@ -88,12 +88,23 @@ def create_media_info_df(result: dict) -> pd.DataFrame:
     return df_media_info
 
 
+def create_media_id_list(result: dict) -> list:
+    """ここで全投稿のmedia idのリストも作っておく"""
+    list_media_id = []
+    for noc in np.arange(len(result)):
+        for nop in np.arange(len(result[noc])):
+            media_id = result[noc][nop]["id"]
+            list_media_id.append(media_id)
+    return list_media_id
+
+
 def main():
     p_basic_info = basic_info()
     result = user_media_info(business_account_id, token, username, media_fields)
     df_media_info = create_media_info_df(result)
-    print(df_media_info.head())
-    print(df_media_info.shape)
+    list_media_id = create_media_id_list(result)
+    print(list_media_id)
+    print(len(list_media_id))
 
 
 if __name__ == "__main__":

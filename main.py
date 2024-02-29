@@ -113,9 +113,7 @@ def user_media_info(business_account_id, token, username, media_fields):
 result = user_media_info(business_account_id, token, username, media_fields)
 for res in result:
     print(res, end="\n\n")
-import sys
 
-sys.exit()
 """NOTE: 02/27 コーディネート系の6投稿しか取得できていない。"""
 """結果をデータフレームに格納"""
 df_media_info = pd.DataFrame(result[0])
@@ -132,7 +130,9 @@ for noc in np.arange(len(result)):
         list_media_id.append(media_id)
 # print('最初の10個だけ表示：',list_media_id[:10])
 # print('全投稿数：',len(list_media_id))
+import sys
 
+sys.exit()
 """投稿ごとのさらに詳細なinsight(reach, saved, impressions, enagegement)を取得する
     ※これは各投稿IDごとにAPIコールが必要なため、処理に少し時間がかかる。改善方法を検討中"""
 
