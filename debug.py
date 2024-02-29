@@ -39,10 +39,11 @@ def media_info(
     fields=media_fields,
 ):
     """メディア情報を取得する"""
+    base_url = "/{business_account_id}?fields=business_discovery.username({username}){{media{{{media_fields}}}}}&access_token={token}"
     request_url = (
         "https://graph.facebook.com/"
         + version
-        + "/{business_account_id}?fields=business_discovery.username({username}){{media{{{media_fields}}}}}&access_token={token}".format(
+        + base_url.format(
             business_account_id=business_account_id,
             username=username,
             media_fields=media_fields,
@@ -58,7 +59,7 @@ def user_media_info(business_account_id, token, username, media_fields):
     all_response = []
     result = media_info()
     all_response.append(result["media"]["data"])
-    print(result["media"]["paging"]["cursors"].keys())
+    print(all_response)
     import sys
 
     sys.exit()
@@ -77,7 +78,6 @@ def user_media_info(business_account_id, token, username, media_fields):
                     next_token=next_token,
                 )
             )
-            #             print(request_url)
             response = requests.get(request_url)
             result = response.json()["business_discovery"]
             all_response.append(result["media"]["data"])
@@ -85,7 +85,6 @@ def user_media_info(business_account_id, token, username, media_fields):
                 next_token = result["media"]["paging"]["cursors"]["after"]
             else:
                 next_token = None
-
     return all_response
 
 
