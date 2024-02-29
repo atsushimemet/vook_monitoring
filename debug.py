@@ -52,6 +52,7 @@ def media_info(
             username=username,
             media_fields=media_fields,
             token=token,
+            next_token=next_token,
         )
     )
     response = requests.get(request_url)
@@ -63,25 +64,11 @@ def user_media_info(business_account_id, token, username, media_fields):
     all_response = []
     result = media_info()
     all_response.append(result["media"]["data"])
-    print(all_response)
-    import sys
-
-    sys.exit()
     # 過去分がある場合は過去分全て取得する(1度に取得できる件数は25件)
     if "after" in result["media"]["paging"]["cursors"].keys():
         next_token = result["media"]["paging"]["cursors"]["after"]
         while next_token is not None:
-            request_url = (
-                "https://graph.facebook.com/"
-                + version
-                + "/{business_account_id}?fields=business_discovery.username({username}){{media.after({next_token}){{{media_fields}}}}}&access_token={token}".format(
-                    business_account_id=business_account_id,
-                    username=username,
-                    media_fields=media_fields,
-                    token=token,
-                    next_token=next_token,
-                )
-            )
+            request_url = media_info(next_token=next_token)
             response = requests.get(request_url)
             result = response.json()["business_discovery"]
             all_response.append(result["media"]["data"])
