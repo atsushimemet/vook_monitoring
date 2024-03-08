@@ -11,6 +11,7 @@ username = USER_NAME
 fields = "name,username,biography,follows_count,followers_count,media_count"
 media_fields = "timestamp,permalink,media_url,like_count,comments_count,caption"
 period = "day"
+metric = ["reach", "impressions", "saved", "engagement"]
 
 
 def basic_info():
@@ -98,13 +99,37 @@ def create_media_id_list(result: dict) -> list:
     return list_media_id
 
 
+# media IDからインサイトを取得する関数
+def media_insight(media_id, p_basic_info, metric=metric):
+    """リクエスト先のurl作成"""
+    metric_for_url = ""
+    for mt in metric:
+        metric_for_url += mt + "%2C"
+    metric_for_url = metric_for_url.rstrip("%2C")
+    request_url = (
+        p_basic_info["endpoint_base"]
+        + media_id
+        + "/insights?access_token="
+        + p_basic_info["access_token"]
+        + "&metric="
+        + metric_for_url
+    )
+    response = requests.get(request_url).json()["data"]
+    response_reshape = dict()
+    response_reshape["id"] = media_id
+    response_reshape["reach"] = response[0]["values"][0]["value"]
+    response_reshape["impressions"] = response[1]["values"][0]["value"]
+    response_reshape["saved"] = response[2]["values"][0]["value"]
+    response_reshape["engagement"] = response[3]["values"][0]["value"]
+    return response_reshape
+
+
 def main():
-    p_basic_info = basic_info()
     result = user_media_info(business_account_id, token, username, media_fields)
     df_media_info = create_media_info_df(result)
     list_media_id = create_media_id_list(result)
-    print(list_media_id)
-    print(len(list_media_id))
+    p_basic_info = basic_info()
+    print(media_insight(list_media_id[0], p_basic_info))
 
 
 if __name__ == "__main__":
