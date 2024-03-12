@@ -162,26 +162,85 @@ def postprocess(
     )
 
 
-def main():
-    result = user_media_info(business_account_id, token, username, media_fields)
-    df_media_info = create_media_info_df(result)
-    list_media_id = create_media_id_list(result)
-    p_basic_info = basic_info()
-    # 全てのmediaIDでインサイトを取得する
+class SpreadSheetExporter:
+    """googleドライブスプレッドシートへの出力 ~各投稿のインサイト~"""
+
+    def __init__(self, df_media):
+        self.json_file = "./instagram-insght-vook-dd85f5af7f10.json"
+        # 出力先スプレッドシートの名前
+        self.work_book = "instagram_insight"
+        # 出力先シートの名前
+        self.work_sheet = "raw"
+        self.list_column = [
+            "id",
+            "timestamp",
+            "permalink",
+            "media_url",
+            "like_count",
+            "saved",
+            "reach",
+            "impressions",
+            "engagement",
+            "caption",
+        ]
+        self.df_media = df_media
+
+    def _preprocess(self):
+        # (gcpで設定したJsonファイルを指定)
+        wb = gspread.service_account(filename=self.json_file)
+        # ワークブックを選択
+        sh = wb.open(self.work_book)
+        self.ws_raw1 = sh.worksheet(self.work_sheet)
+
+    def update(self):
+        self._preprocess()
+        # カラムを追加
+        self.ws_raw1.update("A1:J1", [self.list_column])
+        output_to_spsheet = self.df_media[self.list_column].fillna(0)
+        # シート変更範囲の指定
+        value_chenge_pos1 = "A2:J{}".format(len(output_to_spsheet) + 1)
+        self.ws_raw1.update(value_chenge_pos1, output_to_spsheet.to_numpy().tolist())
+
+
+def exclude_isreel_bfrbusinessacct(results: list) -> list:
+    s = "isReel or bfrBusinessAcct"
+    return [x for x in results if x != s]
+
+
+def create_media_insight_list(list_media_id: list, p_basic_info: dict) -> list:
+    """全てのmediaIDでインサイトを取得する"""
     results = []
     for i, nom in enumerate(np.arange(len(list_media_id))):
         print(f"\r{i+1} / {len(list_media_id)}", end="")
         media_id = list_media_id[nom]
         out = media_insight(media_id, p_basic_info)
         results.append(out)
-        break
-    # print(result[0][0])
-    # print(len(result[0]))
+    return results
+
+
+def results_checker(results: list) -> None:
+    """resultsの中身が変じゃないかtmp.txtでチェック"""
+    original_stdout = sys.stdout  # 標準出力を保持
+    with open("tmp.txt", "w") as f:
+        sys.stdout = f  # 標準出力をファイルにリダイレクト
+        print(results)
+    # 標準出力を元に戻す
+    sys.stdout = original_stdout
+
+
+def main():
+    result = user_media_info(business_account_id, token, username, media_fields)
+    df_media_info = create_media_info_df(result)
+    list_media_id = create_media_id_list(result)
+    p_basic_info = basic_info()
+    results = create_media_insight_list(list_media_id, p_basic_info)
+    results = exclude_isreel_bfrbusinessacct(results)
+    results_checker(results)
     df_media_insight = pd.DataFrame(results)
-    print(df_media_insight.shape)
-    print(df_media_insight.head())
-    """結合してカラムの順番整理"""
     df_media = postprocess(df_media_info, df_media_insight)
+    print(df_media.head())
+    print(df_media.shape)
+    # SpreadSheetExporter(df_media).update()
 
 
 if __name__ == "__main__":
