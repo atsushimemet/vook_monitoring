@@ -1,3 +1,6 @@
+import gspread
+
+
 class SpreadSheetExporter:
     """googleドライブスプレッドシートへの出力 ~各投稿のインサイト~"""
 
