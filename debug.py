@@ -179,22 +179,6 @@ def main():
     print(df_media_insight.head())
     """結合してカラムの順番整理"""
     df_media = postprocess(df_media_info, df_media_insight)
-    # df_media = pd.merge(df_media_info, df_media_insight, how="inner", on="id")
-    # df_media = df_media.reindex(
-    #     columns=[
-    #         "id",
-    #         "timestamp",
-    #         "permalink",
-    #         "media_url",
-    #         "like_count",
-    #         "saved",
-    #         "reach",
-    #         "impressions",
-    #         "engagement",
-    #         "caption",
-    #     ]
-    # )
-    print(df_media.head())
 
 
 if __name__ == "__main__":
