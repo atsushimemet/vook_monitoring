@@ -5,16 +5,10 @@ import numpy as np
 import pandas as pd
 import requests
 
-from local_config import *
+from config import *
+from constant import *
 
-# アクセス情報
-business_account_id = INSTAGRAM_ACCOUNT_ID
-token = ACCESS_TOKEN
-username = USER_NAME
-fields = "name,username,biography,follows_count,followers_count,media_count"
-media_fields = "timestamp,permalink,media_url,like_count,comments_count,caption"
-period = "day"
-metric = ["reach", "impressions", "saved", "engagement"]
+# from local_config import *
 
 
 def basic_info():
