@@ -114,7 +114,21 @@ def media_insight(media_id, p_basic_info, metric=metric):
         + "&metric="
         + metric_for_url
     )
-    response = requests.get(request_url).json()["data"]
+
+    # response = requests.get(request_url).json()["data"]
+    response = requests.get(request_url).json()
+    err_msg1 = "(#100) Incompatible metrics (impressions, engagement) with reel media"
+    err_msg2 = "ビジネスアカウントへの変更前に投稿されたメディア"
+    if response.get("error") and (
+        response["error"]["message"] == err_msg1
+        or response["error"]["error_user_title"] == err_msg2
+    ):
+        return "isReel or bfrBusinessAcct"
+    # try:
+    response = response["data"]
+    # except KeyError as e:
+    #     print(e)
+    #     print(response)
     response_reshape = dict()
     response_reshape["id"] = media_id
     response_reshape["reach"] = response[0]["values"][0]["value"]
@@ -124,12 +138,63 @@ def media_insight(media_id, p_basic_info, metric=metric):
     return response_reshape
 
 
+def postprocess(
+    df_media_info: pd.DataFrame, df_media_insight: pd.DataFrame
+) -> pd.DataFrame:
+    """結合してカラムの順番整理"""
+    df_media = pd.merge(df_media_info, df_media_insight, how="inner", on="id")
+    return df_media.reindex(
+        columns=[
+            "id",
+            "timestamp",
+            "permalink",
+            "media_url",
+            "like_count",
+            "saved",
+            "reach",
+            "impressions",
+            "engagement",
+            "caption",
+        ]
+    )
+
+
 def main():
     result = user_media_info(business_account_id, token, username, media_fields)
     df_media_info = create_media_info_df(result)
     list_media_id = create_media_id_list(result)
     p_basic_info = basic_info()
-    print(media_insight(list_media_id[0], p_basic_info))
+    # 全てのmediaIDでインサイトを取得する
+    results = []
+    for i, nom in enumerate(np.arange(len(list_media_id))):
+        print(f"\r{i+1} / {len(list_media_id)}", end="")
+        media_id = list_media_id[nom]
+        out = media_insight(media_id, p_basic_info)
+        results.append(out)
+        break
+    # print(result[0][0])
+    # print(len(result[0]))
+    df_media_insight = pd.DataFrame(results)
+    print(df_media_insight.shape)
+    print(df_media_insight.head())
+    """結合してカラムの順番整理"""
+    df_media = postprocess(df_media_info, df_media_insight)
+    # df_media = pd.merge(df_media_info, df_media_insight, how="inner", on="id")
+    # df_media = df_media.reindex(
+    #     columns=[
+    #         "id",
+    #         "timestamp",
+    #         "permalink",
+    #         "media_url",
+    #         "like_count",
+    #         "saved",
+    #         "reach",
+    #         "impressions",
+    #         "engagement",
+    #         "caption",
+    #     ]
+    # )
+    print(df_media.head())
 
 
 if __name__ == "__main__":
