@@ -2,6 +2,7 @@ import pandas as pd
 
 from config import *
 from constant import *
+from googles.spread_sheet_exporter import SpreadSheetExporter
 from services.insight_service import create_media_insight_list
 from services.media_service import (
     create_media_id_list,
@@ -24,7 +25,7 @@ def main():
     df_media = postprocess(df_media_info, df_media_insight)
     print(df_media.head())
     print(df_media.shape)
-    # SpreadSheetExporter(df_media).update()
+    SpreadSheetExporter(df_media).update()
 
 
 if __name__ == "__main__":
