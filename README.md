@@ -22,13 +22,23 @@
 └── utils.py # 汎用的なユーティリティ関数を提供するモジュール
 ```
 ## インストール手順
-1. このリポジトリをクローンまたはダウンロードします。
+1. 任意のディレクトリで、このリポジトリをクローンまたはダウンロードします。
+    ```
+    git clone git@github.com:atsushimemet/vook_monitoring.git
+    ```
 2. venvなどで仮想環境を作成します。
-3. 必要なPythonパッケージをインストールします。以下のコマンドを実行してください:
     ```
-    pip install -r requirements.txt
+    python3 -m venv .env
     ```
-4. `config.py` と `constant.py` ファイルを編集し、必要な設定を行ってください。
+3. 仮想環境をアクティベートします。
+    ```
+    source .env/bin/activate
+    ```
+4. 必要なPythonパッケージをインストールします。以下のコマンドを実行してください:
+    ```
+    ./setup.sh
+    ```
+5. local_config.pyの連携をレポジトリオーナーに依頼して下さい。
 ## 使用方法
 1. `main.py` スクリプトを実行します。これにより、設定に基づいてInstagramからメディア情報とインサイトデータが取得されます。
 
