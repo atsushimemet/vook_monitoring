@@ -19,7 +19,7 @@ class SpreadSheetExporter:
             "saved",
             "reach",
             "impressions",
-            "engagement",
+            "total_interactions",
             "caption",
         ]
         self.df_media = df_media
