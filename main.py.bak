@@ -166,12 +166,12 @@ def media_insight(media_id):
     response_reshape["reach"] = response[0]["values"][0]["value"]
     response_reshape["impressions"] = response[1]["values"][0]["value"]
     response_reshape["saved"] = response[2]["values"][0]["value"]
-    response_reshape["engagement"] = response[3]["values"][0]["value"]
+    response_reshape["total_interactions"] = response[3]["values"][0]["value"]
 
     return response_reshape
 
 
-metric = ["reach", "impressions", "saved", "engagement"]
+metric = ["reach", "impressions", "saved", "total_interactions"]
 
 """本来は以下のコードだが、一部インスタ側エラーでインサイトを取得できないのでworkaround的に対応する"""
 # 全てのmediaIDでインサイトを取得する
@@ -207,7 +207,7 @@ df_media = df_media.reindex(
         "saved",
         "reach",
         "impressions",
-        "engagement",
+        "total_interactions",
         "caption",
     ]
 )
@@ -239,7 +239,7 @@ list_column = [
     "saved",
     "reach",
     "impressions",
-    "engagement",
+    "total_interactions",
     "caption",
 ]
 # カラムを追加

@@ -21,11 +21,15 @@ def media_insight(media_id, p_basic_info, metric=metric):
     )
 
     response = requests.get(request_url).json()
-    err_msg1 = "(#100) Incompatible metrics (impressions, engagement) with reel media"
-    err_msg2 = "ビジネスアカウントへの変更前に投稿されたメディア"
+    err_msg1 = (
+        "(#100) Incompatible metrics (impressions, total_interactions) with reel media"
+    )
+    err_msg2 = "(#100) metric[3] must be one of the following values: impressions, reach, replies, saved, video_views, likes, comments, shares, plays, total_interactions, follows, profile_visits, profile_activity, navigation, ig_reels_video_view_total_time, ig_reels_avg_watch_time, clips_replays_count, ig_reels_aggregated_all_plays_count"
+    err_msg3 = "ビジネスアカウントへの変更前に投稿されたメディア"
     if response.get("error") and (
         response["error"]["message"] == err_msg1
-        or response["error"]["error_user_title"] == err_msg2
+        or response["error"]["message"] == err_msg2
+        or response["error"]["error_user_title"] == err_msg3
     ):
         return "isReel or bfrBusinessAcct"
     # try:
@@ -38,7 +42,7 @@ def media_insight(media_id, p_basic_info, metric=metric):
     response_reshape["reach"] = response[0]["values"][0]["value"]
     response_reshape["impressions"] = response[1]["values"][0]["value"]
     response_reshape["saved"] = response[2]["values"][0]["value"]
-    response_reshape["engagement"] = response[3]["values"][0]["value"]
+    response_reshape["total_interactions"] = response[3]["values"][0]["value"]
     return response_reshape
 
 
