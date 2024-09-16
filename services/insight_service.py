@@ -25,11 +25,13 @@ def media_insight(media_id, p_basic_info, metric=metric):
         "(#100) Incompatible metrics (impressions, total_interactions) with reel media"
     )
     err_msg2 = "(#100) metric[3] must be one of the following values: impressions, reach, replies, saved, video_views, likes, comments, shares, plays, total_interactions, follows, profile_visits, profile_activity, navigation, ig_reels_video_view_total_time, ig_reels_avg_watch_time, clips_replays_count, ig_reels_aggregated_all_plays_count"
-    err_msg3 = "ビジネスアカウントへの変更前に投稿されたメディア"
+    err_msg3 = "(#100) The Media Insights API does not support the impressions metric for this media product type."
+    err_msg4 = "ビジネスアカウントへの変更前に投稿されたメディア"
     if response.get("error") and (
         response["error"]["message"] == err_msg1
         or response["error"]["message"] == err_msg2
-        or response["error"]["error_user_title"] == err_msg3
+        or response["error"]["message"] == err_msg3
+        or response["error"]["error_user_title"] == err_msg4
     ):
         return "isReel or bfrBusinessAcct"
     # try:
