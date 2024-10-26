@@ -128,9 +128,9 @@ df_account_status_in30days = pd.DataFrame(result)
 print(df_account_status_in30days)
 
 # 時系列で並び替え
-df_account_status_in30days = df_account_status_in30days.sort_values(
-    by="endtime", ascending=False, ignore_index=True
-)
+# df_account_status_in30days = df_account_status_in30days.sort_values(
+#     by="endtime", ascending=True, ignore_index=True
+# )
 # # 既存で最新のファイルを取得
 # path_name = "../data/output"
 # file_names = glob.glob(path_name + "/account*")
