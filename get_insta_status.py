@@ -1,5 +1,4 @@
 import datetime
-import glob
 
 import gspread
 import pandas as pd
@@ -8,6 +7,9 @@ import requests
 from local_config import *
 
 version = "v17.0"
+fields = "name,username,biography,follows_count,followers_count,media_count"
+# 昨日のアカウントステータスを取得する
+delta_days = 1
 
 
 def basic_info():
@@ -31,22 +33,11 @@ def basic_info():
     return config
 
 
-params = basic_info()  # リクエストパラメータ
-
-# アクセス情報
-business_account_id = INSTAGRAM_ACCOUNT_ID
-token = ACCESS_TOKEN
-username = USER_NAME
-fields = "name,username,biography,follows_count,followers_count,media_count"
-media_fields = "timestamp,permalink,media_url,like_count,comments_count,caption"
-period = "day"
-
-
 # ユーザー情報を取得する
 def user_info(
     business_account_id=INSTAGRAM_ACCOUNT_ID,
     token=ACCESS_TOKEN,
-    username=username,
+    username=USER_NAME,
     fields=fields,
 ):
     request_url = (
@@ -64,16 +55,12 @@ def user_info(
     return response.json()["business_discovery"]
 
 
-# 昨日のアカウントステータスを取得する
-delta_days = 1
 today = datetime.datetime.today()
 date_delta = datetime.datetime.today() - datetime.timedelta(days=delta_days)
 yyyymmdd_td = "{yyyy}/{mm}/{dd}".format(yyyy=today.year, mm=today.month, dd=today.day)
 yyyymmdd_delta = "{yyyy}/{mm}/{dd}".format(
     yyyy=date_delta.year, mm=date_delta.month, dd=date_delta.day
 )
-print("今日の日付：", yyyymmdd_td)
-print("遡った日付：", yyyymmdd_delta)
 
 # エンドポイントURLの作成
 metric = ["follower_count", "impressions", "profile_views", "reach"]
@@ -82,6 +69,7 @@ for mt in metric:
     metric_for_url += mt + "%2C"
 metric_for_url = metric_for_url.rstrip("%2C")
 
+params = basic_info()  # リクエストパラメータ
 request_url = (
     params["endpoint_base"]
     + params["instagram_account_id"]
@@ -96,20 +84,14 @@ request_url = (
     + yyyymmdd_td
 )
 response = requests.get(request_url).json()["data"]
-
 day_n = delta_days - 1
-end_time_yesterday = response[0]["values"][day_n]["end_time"]
-follower_count_yesterday = response[0]["values"][day_n]["value"]
-impressions_yesterday = response[1]["values"][day_n]["value"]
-profile_views_yesterday = response[2]["values"][day_n]["value"]
-reach_yesterday = response[3]["values"][day_n]["value"]
+end_time_yesterday = response[0]["values"][0]["end_time"]
+follower_count_yesterday = response[0]["values"][0]["value"]
+impressions_yesterday = response[1]["values"][0]["value"]
+profile_views_yesterday = response[2]["values"][0]["value"]
+reach_yesterday = response[3]["values"][0]["value"]
 # 最新日付のフォロワー数のみ別で取得し、昨日のデータとして取り扱う。
-follower_today = user_info(
-    business_account_id=INSTAGRAM_ACCOUNT_ID,
-    token=ACCESS_TOKEN,
-    username=username,
-    fields=fields,
-)["followers_count"]
+follower_today = user_info()["followers_count"]
 
 # 新しい行のデータを辞書形式で定義
 yesterday_row = {
@@ -120,8 +102,6 @@ yesterday_row = {
     "reach": [reach_yesterday],
     "follower": [follower_today],
 }
-
-# 新しいインデックスを取得（既存のデータフレームの長さ）
 df_yesterday = pd.DataFrame(yesterday_row)
 
 json_file = "./instagram-insght-vook-dd85f5af7f10.json"
@@ -141,4 +121,4 @@ df_bfr_yesterday = pd.DataFrame(data_yesterday)
 df_last = pd.concat([df_bfr_yesterday, df_yesterday], ignore_index=True)
 # # #シート変更範囲の指定
 value_chenge_pos1 = "A2:F{}".format(len(df_last) + 1)
-# ws_raw2.update(value_chenge_pos1, df_last.to_numpy().tolist())
+ws_raw2.update(value_chenge_pos1, df_last.to_numpy().tolist())
