@@ -127,11 +127,10 @@ result["follower"] = ""
 df_account_status_in30days = pd.DataFrame(result)
 print(df_account_status_in30days)
 
-# # 時系列で並び替え
-# df_account_status_in30days = df_account_status_in30days.sort_values(
-#     by="endtime", ascending=False, ignore_index=True
-# )
-
+# 時系列で並び替え
+df_account_status_in30days = df_account_status_in30days.sort_values(
+    by="endtime", ascending=False, ignore_index=True
+)
 # # 既存で最新のファイルを取得
 # path_name = "../data/output"
 # file_names = glob.glob(path_name + "/account*")
@@ -139,31 +138,34 @@ print(df_account_status_in30days)
 # file_names_latest_date
 # df_file_latest = pd.read_csv(file_names_latest_date)
 
-# # この実行で更新したdataframeと既存の最新dataframeを結合して重複排除する
-# column_list = [
-#     "endtime",
-#     "follower_count",
-#     "profile_views",
-#     "impressions",
-#     "reach",
-#     "follower",
-# ]
+# この実行で更新したdataframeと既存の最新dataframeを結合して重複排除する
+column_list = [
+    "endtime",
+    "follower_count",
+    "profile_views",
+    "impressions",
+    "reach",
+    "follower",
+]
 # df_account_st_main = pd.concat(
 #     [df_file_latest, df_account_status_in30days], ignore_index=True
 # )
+# TODO:30日分の運用に変更
+df_account_st_main = df_account_status_in30days.copy()
 # df_account_st_main = df_account_st_main.drop_duplicates(subset="endtime")
 # df_account_st_main = df_account_st_main.sort_values(by="endtime", ascending=True)
 # df_account_st_main = df_account_st_main[column_list]
 
-# # 最新日付のフォロワー数が入っていないのでここで入力
-# follower_today = user_info(
-#     business_account_id=INSTAGRAM_ACCOUNT_ID,
-#     token=ACCESS_TOKEN,
-#     username=username,
-#     fields=fields,
-# )["followers_count"]
-# len_df = len(df_account_st_main)
-# df_account_st_main.iat[len_df - 1, 5] = follower_today
+# 最新日付のフォロワー数が入っていないのでここで入力
+follower_today = user_info(
+    business_account_id=INSTAGRAM_ACCOUNT_ID,
+    token=ACCESS_TOKEN,
+    username=username,
+    fields=fields,
+)["followers_count"]
+len_df = len(df_account_st_main)
+df_account_st_main.iat[len_df - 1, 5] = follower_today
+print(df_account_st_main)
 
 # # csvに書き出して保存
 # today = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")[:8]
