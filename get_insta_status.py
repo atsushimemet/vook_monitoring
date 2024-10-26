@@ -34,103 +34,98 @@ def basic_info():
 
 
 params = basic_info()  # リクエストパラメータ
-# response = debugAT(params)    # レスポンス
 
 # アクセス情報
-# business_account_id = INSTAGRAM_ACCOUNT_ID
-# token = ACCESS_TOKEN
-# username = USER_NAME
-# fields = "name,username,biography,follows_count,followers_count,media_count"
-# media_fields = "timestamp,permalink,media_url,like_count,comments_count,caption"
-# period = "day"
+business_account_id = INSTAGRAM_ACCOUNT_ID
+token = ACCESS_TOKEN
+username = USER_NAME
+fields = "name,username,biography,follows_count,followers_count,media_count"
+media_fields = "timestamp,permalink,media_url,like_count,comments_count,caption"
+period = "day"
 
 
-# # ユーザー情報を取得する
-# def user_info(
-#     business_account_id=INSTAGRAM_ACCOUNT_ID,
-#     token=ACCESS_TOKEN,
-#     username=username,
-#     fields=fields,
-# ):
-#     request_url = (
-#         "https://graph.facebook.com/"
-#         + version
-#         + "/{business_account_id}?fields=business_discovery.username({username}){{{fields}}}&access_token={token}".format(
-#             business_account_id=business_account_id,
-#             username=username,
-#             fields=fields,
-#             token=token,
-#         )
-#     )
-#     #     print(request_url)
-#     response = requests.get(request_url)
-#     return response.json()["business_discovery"]
+# ユーザー情報を取得する
+def user_info(
+    business_account_id=INSTAGRAM_ACCOUNT_ID,
+    token=ACCESS_TOKEN,
+    username=username,
+    fields=fields,
+):
+    request_url = (
+        "https://graph.facebook.com/"
+        + version
+        + "/{business_account_id}?fields=business_discovery.username({username}){{{fields}}}&access_token={token}".format(
+            business_account_id=business_account_id,
+            username=username,
+            fields=fields,
+            token=token,
+        )
+    )
+    #     print(request_url)
+    response = requests.get(request_url)
+    return response.json()["business_discovery"]
 
 
 # """直近30日間のアカウントステータスを取得する"""
-# # ※30日は遡れる日数の上限
+# ※30日は遡れる日数の上限
+# 今日と指定日さかのぼった日付をyyyy/mm/ddの形式で取得する 標準時に設定
+delta_days = 30
+today = datetime.datetime.today()
+date_delta = datetime.datetime.today() - datetime.timedelta(days=delta_days)
+yyyymmdd_td = "{yyyy}/{mm}/{dd}".format(yyyy=today.year, mm=today.month, dd=today.day)
+yyyymmdd_delta = "{yyyy}/{mm}/{dd}".format(
+    yyyy=date_delta.year, mm=date_delta.month, dd=date_delta.day
+)
+print("今日の日付：", yyyymmdd_td)
+print("遡った日付：", yyyymmdd_delta)
 
+# エンドポイントURLの作成
+metric = ["follower_count", "impressions", "profile_views", "reach"]
+metric_for_url = ""
+for mt in metric:
+    metric_for_url += mt + "%2C"
+metric_for_url = metric_for_url.rstrip("%2C")
 
-# # 今日と指定日さかのぼった日付をyyyy/mm/ddの形式で取得する 標準時に設定
-# delta_days = 30
-# today = datetime.datetime.utcnow()
-# date_delta = datetime.datetime.utcnow() - datetime.timedelta(days=delta_days)
+request_url = (
+    params["endpoint_base"]
+    + params["instagram_account_id"]
+    + "/insights?access_token="
+    + params["access_token"]
+    + "&metric="
+    + metric_for_url
+    + "&period=day"
+    + "&since="
+    + yyyymmdd_delta
+    + "&until="
+    + yyyymmdd_td
+)
+response = requests.get(request_url).json()["data"]
+print(response)
 
-# yyyymmdd_td = "{yyyy}/{mm}/{dd}".format(yyyy=today.year, mm=today.month, dd=today.day)
-# yyyymmdd_delta = "{yyyy}/{mm}/{dd}".format(
-#     yyyy=date_delta.year, mm=date_delta.month, dd=date_delta.day
-# )
+list_endtimes = []
+list_impressions = []
+list_follower_count = []
+list_reach = []
+list_profile_views = []
 
-# print("今日の日付：", yyyymmdd_td)
-# print("遡った日付：", yyyymmdd_delta)
+for day_n in range(delta_days):
+    list_endtimes.append(response[0]["values"][day_n]["end_time"])
+    list_follower_count.append(response[0]["values"][day_n]["value"])
+    list_impressions.append(response[1]["values"][day_n]["value"])
+    list_profile_views.append(response[2]["values"][day_n]["value"])
+    list_reach.append(response[3]["values"][day_n]["value"])
 
-# # エンドポイントURLの作成
-# metric = ["follower_count", "impressions", "profile_views", "reach"]
-# metric_for_url = ""
-# for mt in metric:
-#     metric_for_url += mt + "%2C"
-# metric_for_url = metric_for_url.rstrip("%2C")
+result = dict()
+result["endtime"] = list_endtimes
+result["follower_count"] = list_follower_count
+result["profile_views"] = list_profile_views
+result["impressions"] = list_impressions
+result["reach"] = list_reach
+result["follower"] = ""
 
-# request_url = (
-#     params["endpoint_base"]
-#     + params["instagram_account_id"]
-#     + "/insights?access_token="
-#     + params["access_token"]
-#     + "&metric="
-#     + metric_for_url
-#     + "&period=day"
-#     + "&since="
-#     + yyyymmdd_delta
-#     + "&until="
-#     + yyyymmdd_td
-# )
-# response = requests.get(request_url).json()["data"]
-
-# list_endtimes = []
-# list_impressions = []
-# list_follower_count = []
-# list_reach = []
-# list_profile_views = []
-
-# for day_n in range(delta_days):
-#     list_endtimes.append(response[0]["values"][day_n]["end_time"])
-#     list_follower_count.append(response[0]["values"][day_n]["value"])
-#     list_impressions.append(response[1]["values"][day_n]["value"])
-#     list_profile_views.append(response[2]["values"][day_n]["value"])
-#     list_reach.append(response[3]["values"][day_n]["value"])
-
-# result = dict()
-# result["endtime"] = list_endtimes
-# result["follower_count"] = list_follower_count
-# result["profile_views"] = list_profile_views
-# result["impressions"] = list_impressions
-# result["reach"] = list_reach
-# result["follower"] = ""
-
-
-# # データフレームとして格納
-# df_account_status_in30days = pd.DataFrame(result)
-# df_account_status_in30days
+# データフレームとして格納
+df_account_status_in30days = pd.DataFrame(result)
+print(df_account_status_in30days)
 
 # # 時系列で並び替え
 # df_account_status_in30days = df_account_status_in30days.sort_values(
