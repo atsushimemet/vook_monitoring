@@ -1,15 +1,11 @@
 import datetime
 import glob
 
-# ローカルにおいてあるconfigファイルを読み出して、認証情報を取得しておく
-import sys
-
 import gspread
 import pandas as pd
 import requests
 
-sys.path.append("../")
-from instaapi.local_config_vook import *
+from local_config import *
 
 version = "v17.0"
 
