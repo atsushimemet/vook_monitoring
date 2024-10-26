@@ -177,40 +177,40 @@ print(df_account_st_main)
 
 # """google　ドライブ　スプレッドシートへの出力 ~直近30日のアカウントのインサイト~"""
 
-# start_cut = 335  # 元データは9月1日からだが、スプレッドシートに吐き出すのは二ヶ月前の1日からで良いので、start_cut日分はスプレッドシートに送らない
-json_file = "./instagram-insght-vook-dd85f5af7f10.json"
-# 出力先スプレッドシートの名前
-work_book = "instagram_insight"
-# 出力先シートの名前
-work_sheet = "raw2"
+# # start_cut = 335  # 元データは9月1日からだが、スプレッドシートに吐き出すのは二ヶ月前の1日からで良いので、start_cut日分はスプレッドシートに送らない
+# json_file = "./instagram-insght-vook-dd85f5af7f10.json"
+# # 出力先スプレッドシートの名前
+# work_book = "instagram_insight"
+# # 出力先シートの名前
+# work_sheet = "raw2"
 
-# (gcpで設定したJsonファイルを指定)
-wb = gspread.service_account(filename=json_file)
-# ワークブックを選択
-sh = wb.open(work_book)
+# # (gcpで設定したJsonファイルを指定)
+# wb = gspread.service_account(filename=json_file)
+# # ワークブックを選択
+# sh = wb.open(work_book)
 
-# #シート一覧を取得する
-# ws_list = sh.worksheets()
+# # #シート一覧を取得する
+# # ws_list = sh.worksheets()
 
-# シートを指定する
-ws_raw2 = sh.worksheet(work_sheet)
+# # シートを指定する
+# ws_raw2 = sh.worksheet(work_sheet)
 
-list_column2 = [
-    "endtime",
-    "follower_count",
-    "impressions",
-    "profile_views",
-    "reach",
-    "follower",
-]
+# list_column2 = [
+#     "endtime",
+#     "follower_count",
+#     "impressions",
+#     "profile_views",
+#     "reach",
+#     "follower",
+# ]
 
-# カラムを追加
-ws_raw2.update("A1:F1", [list_column2])
-# # output_df1 = pd.DataFrame(df_out[list_column]).fillna(0)
-# output_to_spsheet = df_account_st_main[list_column2][start_cut:].fillna(0)
-output_to_spsheet = df_account_st_main[list_column2].fillna(0)
+# # カラムを追加
+# ws_raw2.update("A1:F1", [list_column2])
+# # # output_df1 = pd.DataFrame(df_out[list_column]).fillna(0)
+# # output_to_spsheet = df_account_st_main[list_column2][start_cut:].fillna(0)
+# output_to_spsheet = df_account_st_main[list_column2].fillna(0)
 
-# シート変更範囲の指定
-value_chenge_pos1 = "A2:F{}".format(len(output_to_spsheet) + 1)
+# # シート変更範囲の指定
+# value_chenge_pos1 = "A2:F{}".format(len(output_to_spsheet) + 1)
 
-ws_raw2.update(value_chenge_pos1, output_to_spsheet.to_numpy().tolist())
+# ws_raw2.update(value_chenge_pos1, output_to_spsheet.to_numpy().tolist())
