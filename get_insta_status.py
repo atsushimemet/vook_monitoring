@@ -66,7 +66,7 @@ def user_info(
     return response.json()["business_discovery"]
 
 
-# """昨日のアカウントステータスを取得する"""
+# 昨日のアカウントステータスを取得する
 delta_days = 1
 today = datetime.datetime.today()
 date_delta = datetime.datetime.today() - datetime.timedelta(days=delta_days)
@@ -99,19 +99,6 @@ request_url = (
 )
 response = requests.get(request_url).json()["data"]
 
-# list_endtimes = []
-# list_impressions = []
-# list_follower_count = []
-# list_reach = []
-# list_profile_views = []
-# list_follower = []
-
-# for day_n in range(delta_days):
-#     list_endtimes.append(response[0]["values"][day_n]["end_time"])
-#     list_follower_count.append(response[0]["values"][day_n]["value"])
-#     list_impressions.append(response[1]["values"][day_n]["value"])
-#     list_profile_views.append(response[2]["values"][day_n]["value"])
-#     list_reach.append(response[3]["values"][day_n]["value"])
 day_n = delta_days - 1
 end_time_yesterday = response[0]["values"][day_n]["end_time"]
 follower_count_yesterday = response[0]["values"][day_n]["value"]
@@ -139,19 +126,6 @@ yesterday_row = {
 # 新しいインデックスを取得（既存のデータフレームの長さ）
 df_yesterday = pd.DataFrame(yesterday_row)
 
-# result = dict()
-# result["endtime"] = list_endtimes
-# result["follower_count"] = list_follower_count
-# result["impressions"] = list_impressions
-# result["profile_views"] = list_profile_views
-# result["reach"] = list_reach
-# result["follower"] = list_follower
-
-
-# # データフレームとして格納
-# df_today = pd.DataFrame(result)
-# print(df_today)
-
 json_file = "./instagram-insght-vook-dd85f5af7f10.json"
 # 出力先スプレッドシートの名前
 work_book = "instagram_insight"
@@ -166,11 +140,7 @@ ws_raw2 = sh.worksheet(work_sheet)
 data_yesterday = ws_raw2.get_all_records()
 # pandasのデータフレームに変換
 df_bfr_yesterday = pd.DataFrame(data_yesterday)
-print(pd.concat([df_bfr_yesterday, df_yesterday], ignore_index=True))
-# # 新しい行を追加
-# new_index = len(df_bfr_yesterday)
-# df_bfr_yesterday.loc[new_index] = yesterday_row
-# # # #シート変更範囲の指定
-# value_chenge_pos1 = "A2:F{}".format(len(df_bfr_yesterday) + 1)
-# print(df_bfr_yesterday.to_numpy().tolist())
-# # ws_raw2.update(value_chenge_pos1, df_bfr_yesterday.to_numpy().tolist())
+df_last = pd.concat([df_bfr_yesterday, df_yesterday], ignore_index=True)
+# # #シート変更範囲の指定
+value_chenge_pos1 = "A2:F{}".format(len(df_last) + 1)
+# ws_raw2.update(value_chenge_pos1, df_last.to_numpy().tolist())
