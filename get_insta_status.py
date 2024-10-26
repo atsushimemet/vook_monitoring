@@ -69,7 +69,7 @@ def user_info(
 # """直近30日間のアカウントステータスを取得する"""
 # ※30日は遡れる日数の上限
 # 今日と指定日さかのぼった日付をyyyy/mm/ddの形式で取得する 標準時に設定
-delta_days = 30
+delta_days = 1
 today = datetime.datetime.today()
 date_delta = datetime.datetime.today() - datetime.timedelta(days=delta_days)
 yyyymmdd_td = "{yyyy}/{mm}/{dd}".format(yyyy=today.year, mm=today.month, dd=today.day)
@@ -107,6 +107,7 @@ list_impressions = []
 list_follower_count = []
 list_reach = []
 list_profile_views = []
+list_follower = []
 
 for day_n in range(delta_days):
     list_endtimes.append(response[0]["values"][day_n]["end_time"])
@@ -115,47 +116,6 @@ for day_n in range(delta_days):
     list_profile_views.append(response[2]["values"][day_n]["value"])
     list_reach.append(response[3]["values"][day_n]["value"])
 
-result = dict()
-result["endtime"] = list_endtimes
-result["follower_count"] = list_follower_count
-result["profile_views"] = list_profile_views
-result["impressions"] = list_impressions
-result["reach"] = list_reach
-result["follower"] = ""
-
-# データフレームとして格納
-df_account_status_in30days = pd.DataFrame(result)
-print(df_account_status_in30days)
-
-# 時系列で並び替え
-# df_account_status_in30days = df_account_status_in30days.sort_values(
-#     by="endtime", ascending=True, ignore_index=True
-# )
-# # 既存で最新のファイルを取得
-# path_name = "../data/output"
-# file_names = glob.glob(path_name + "/account*")
-# file_names_latest_date = sorted(file_names)[-1]
-# file_names_latest_date
-# df_file_latest = pd.read_csv(file_names_latest_date)
-
-# この実行で更新したdataframeと既存の最新dataframeを結合して重複排除する
-column_list = [
-    "endtime",
-    "follower_count",
-    "profile_views",
-    "impressions",
-    "reach",
-    "follower",
-]
-# df_account_st_main = pd.concat(
-#     [df_file_latest, df_account_status_in30days], ignore_index=True
-# )
-# TODO:30日分の運用に変更
-df_account_st_main = df_account_status_in30days.copy()
-# df_account_st_main = df_account_st_main.drop_duplicates(subset="endtime")
-# df_account_st_main = df_account_st_main.sort_values(by="endtime", ascending=True)
-# df_account_st_main = df_account_st_main[column_list]
-
 # 最新日付のフォロワー数が入っていないのでここで入力
 follower_today = user_info(
     business_account_id=INSTAGRAM_ACCOUNT_ID,
@@ -163,54 +123,114 @@ follower_today = user_info(
     username=username,
     fields=fields,
 )["followers_count"]
-len_df = len(df_account_st_main)
-df_account_st_main.iat[len_df - 1, 5] = follower_today
-print(df_account_st_main)
+list_follower.append(follower_today)
 
-# # csvに書き出して保存
-# today = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")[:8]
-# df_account_st_main.to_csv(
-#     "../data/output/account_status_vook_" + today + ".csv", index=False
-# )
-# # df_account_st_main.to_csv('../data/output/account_status_vook_231002x.csv', index=False)
-# print("更新ファイルの日付:{}".format(today))
+result = dict()
+result["endtime"] = list_endtimes
+result["follower_count"] = list_follower_count
+result["impressions"] = list_impressions
+result["profile_views"] = list_profile_views
+result["reach"] = list_reach
+result["follower"] = list_follower
 
-# """google　ドライブ　スプレッドシートへの出力 ~直近30日のアカウントのインサイト~"""
 
-# # start_cut = 335  # 元データは9月1日からだが、スプレッドシートに吐き出すのは二ヶ月前の1日からで良いので、start_cut日分はスプレッドシートに送らない
-# json_file = "./instagram-insght-vook-dd85f5af7f10.json"
-# # 出力先スプレッドシートの名前
-# work_book = "instagram_insight"
-# # 出力先シートの名前
-# work_sheet = "raw2"
+# データフレームとして格納
+df_today = pd.DataFrame(result)
+print(df_today)
 
-# # (gcpで設定したJsonファイルを指定)
-# wb = gspread.service_account(filename=json_file)
-# # ワークブックを選択
-# sh = wb.open(work_book)
+json_file = "./instagram-insght-vook-dd85f5af7f10.json"
+# 出力先スプレッドシートの名前
+work_book = "instagram_insight"
+# 出力先シートの名前
+work_sheet = "raw2"
+# (gcpで設定したJsonファイルを指定)
+wb = gspread.service_account(filename=json_file)
+# ワークブックを選択
+sh = wb.open(work_book)
+ws_raw2 = sh.worksheet(work_sheet)
+# シートの全データを辞書形式で取得
+data_yesterday = ws_raw2.get_all_records()
+# pandasのデータフレームに変換
+df_yesterday = pd.DataFrame(data_yesterday)
+print(df_yesterday)
 
-# # #シート一覧を取得する
-# # ws_list = sh.worksheets()
+df = pd.concat([df_yesterday, df_today], ignore_index=True)
+print(df)
 
-# # シートを指定する
-# ws_raw2 = sh.worksheet(work_sheet)
+# # 時系列で並び替え
+# # df_account_status_in30days = df_account_status_in30days.sort_values(
+# #     by="endtime", ascending=True, ignore_index=True
+# # )
+# # # 既存で最新のファイルを取得
+# # path_name = "../data/output"
+# # file_names = glob.glob(path_name + "/account*")
+# # file_names_latest_date = sorted(file_names)[-1]
+# # file_names_latest_date
+# # df_file_latest = pd.read_csv(file_names_latest_date)
 
-# list_column2 = [
+# # この実行で更新したdataframeと既存の最新dataframeを結合して重複排除する
+# column_list = [
 #     "endtime",
 #     "follower_count",
-#     "impressions",
 #     "profile_views",
+#     "impressions",
 #     "reach",
 #     "follower",
 # ]
+# # df_account_st_main = pd.concat(
+# #     [df_file_latest, df_account_status_in30days], ignore_index=True
+# # )
+# # TODO:30日分の運用に変更
+# df_account_st_main = df_account_status_in30days.copy()
+# # df_account_st_main = df_account_st_main.drop_duplicates(subset="endtime")
+# # df_account_st_main = df_account_st_main.sort_values(by="endtime", ascending=True)
+# # df_account_st_main = df_account_st_main[column_list]
 
-# # カラムを追加
-# ws_raw2.update("A1:F1", [list_column2])
-# # # output_df1 = pd.DataFrame(df_out[list_column]).fillna(0)
-# # output_to_spsheet = df_account_st_main[list_column2][start_cut:].fillna(0)
-# output_to_spsheet = df_account_st_main[list_column2].fillna(0)
 
-# # シート変更範囲の指定
-# value_chenge_pos1 = "A2:F{}".format(len(output_to_spsheet) + 1)
+# # # csvに書き出して保存
+# # today = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")[:8]
+# # df_account_st_main.to_csv(
+# #     "../data/output/account_status_vook_" + today + ".csv", index=False
+# # )
+# # # df_account_st_main.to_csv('../data/output/account_status_vook_231002x.csv', index=False)
+# # print("更新ファイルの日付:{}".format(today))
 
-# ws_raw2.update(value_chenge_pos1, output_to_spsheet.to_numpy().tolist())
+# # """google　ドライブ　スプレッドシートへの出力 ~直近30日のアカウントのインサイト~"""
+
+# # # start_cut = 335  # 元データは9月1日からだが、スプレッドシートに吐き出すのは二ヶ月前の1日からで良いので、start_cut日分はスプレッドシートに送らない
+# # json_file = "./instagram-insght-vook-dd85f5af7f10.json"
+# # # 出力先スプレッドシートの名前
+# # work_book = "instagram_insight"
+# # # 出力先シートの名前
+# # work_sheet = "raw2"
+
+
+# # # (gcpで設定したJsonファイルを指定)
+# # wb = gspread.service_account(filename=json_file)
+# # # ワークブックを選択
+# # sh = wb.open(work_book)
+
+# # # #シート一覧を取得する
+# # # ws_list = sh.worksheets()
+
+# # # シートを指定する
+# # ws_raw2 = sh.worksheet(work_sheet)
+
+# # list_column2 = [
+# #     "endtime",
+# #     "follower_count",
+# #     "impressions",
+# #     "profile_views",
+# #     "reach",
+# #     "follower",
+# # ]
+
+# # # カラムを追加
+# # ws_raw2.update("A1:F1", [list_column2])
+# # # # output_df1 = pd.DataFrame(df_out[list_column]).fillna(0)
+# # # output_to_spsheet = df_account_st_main[list_column2][start_cut:].fillna(0)
+# # output_to_spsheet = df_account_st_main[list_column2].fillna(0)
+
+# # # シート変更範囲の指定
+value_chenge_pos1 = "A2:F{}".format(len(df) + 1)
+ws_raw2.update(value_chenge_pos1, df.to_numpy().tolist())
