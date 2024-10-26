@@ -30,8 +30,6 @@ def basic_info():
     # 出力
     return config
 
-    # リクエスト
-
 
 params = basic_info()  # リクエストパラメータ
 
