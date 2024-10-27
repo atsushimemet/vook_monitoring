@@ -116,9 +116,6 @@ sh = wb.open(work_book)
 ws_raw2 = sh.worksheet(work_sheet)
 # シートの全データを辞書形式で取得
 data_yesterday = ws_raw2.get_all_records()
-# pandasのデータフレームに変換
-df_bfr_yesterday = pd.DataFrame(data_yesterday)
-df_last = pd.concat([df_bfr_yesterday, df_yesterday], ignore_index=True)
-# # #シート変更範囲の指定
-value_chenge_pos1 = "A2:F{}".format(len(df_last) + 1)
-ws_raw2.update(value_chenge_pos1, df_last.to_numpy().tolist())
+# シート変更範囲の指定
+value_chenge_pos1 = "A{}:F{}".format(len(data_yesterday) + 1, len(data_yesterday) + 1)
+ws_raw2.update(value_chenge_pos1, df_yesterday.to_numpy().tolist())
