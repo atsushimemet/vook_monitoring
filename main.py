@@ -128,10 +128,26 @@ def main2():
     ws_raw2 = sh.worksheet(work_sheet)
     # シートの全データを辞書形式で取得
     data_yesterday = ws_raw2.get_all_records()
+
+    # NOTE:当月末予測をスプレッドシートで描画するために、G列に手動更新列があることに対する暫定対応
+    # 必要なキー（列名）を指定
+    required_keys = [
+        "endtime",
+        "follower_count",
+        "impressions",
+        "profile_views",
+        "reach",
+        "follower",
+    ]
+    # 欠損がないレコードのみを抽出
+    filtered_data = [
+        record
+        for record in data_yesterday
+        if all(record.get(key) not in (None, "") for key in required_keys)
+    ]
+
     # シート変更範囲の指定
-    value_chenge_pos1 = "A{}:F{}".format(
-        len(data_yesterday) + 2, len(data_yesterday) + 2
-    )
+    value_chenge_pos1 = "A{}:F{}".format(len(filtered_data) + 2, len(filtered_data) + 2)
     ws_raw2.update(value_chenge_pos1, df_yesterday.to_numpy().tolist())
 
 
